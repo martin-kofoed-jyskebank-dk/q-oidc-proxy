@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import dk.kofoed.proxy.client.OidcClient;
 import dk.kofoed.proxy.client.model.AccessTokenResponse;
 import dk.kofoed.proxy.exception.OidcProviderException;
+import dk.kofoed.proxy.exception.ProxyClientException;
 
 @ApplicationScoped
 public class AuthService {
@@ -80,7 +81,7 @@ public class AuthService {
      */
     public AccessTokenResponse getAccessToken(String authCode) {
 
-        logger.info("Getting access_token ...");
+        logger.info("Getting access_token for auth code [{}]", authCode);
 
         try {
             return oidcClient.getAccessToken(
@@ -93,11 +94,10 @@ public class AuthService {
         } catch (OidcProviderException e) {
             logger.error("Could not retrieve an access token from OIDC provider. Error code: [{}]. Message: [{}]", 
                 e.getErrorCode(), 
-                e.getMessage(),
-                e
+                e.getMessage()
             );
+            throw new ProxyClientException("Could not retrieve access token", 401);
         }
-        return null;
     }
 
     /**
