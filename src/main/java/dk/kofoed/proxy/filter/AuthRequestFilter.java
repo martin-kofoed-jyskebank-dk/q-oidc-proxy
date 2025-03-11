@@ -32,8 +32,8 @@ public class AuthRequestFilter {
     @ConfigProperty(name = "auth.proxy.type", defaultValue = "UNKNOWN")
     AuthType authType;
 
-    @ConfigProperty(name = "auth.proxy.oidc.conf.url")
-    String oidcProviderConfUri;
+    @ConfigProperty(name = "auth.proxy.oidc.base.url")
+    String oidcProviderBaseUri;
 
     @ConfigProperty(name = "auth.proxy.header.name")
     String headerName;
@@ -148,7 +148,7 @@ public class AuthRequestFilter {
         URI oidcProvider = null;
         String url = "";
         try {
-            url = oidcProviderConfUri + authService.buildAuthInitUri();
+            url = oidcProviderBaseUri + authService.buildAuthInitUri();
             oidcProvider = new URI(url);
         } catch (URISyntaxException e) {
             return badRequest("Could not parse OIDC Provider URL: " + url);

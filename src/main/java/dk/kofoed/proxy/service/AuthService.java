@@ -30,10 +30,10 @@ public class AuthService {
     @ConfigProperty(name = "auth.proxy.oidc.response.type", defaultValue = "code")
     String responseType;
 
-    @ConfigProperty(name = "auth.proxy.oidc.client.id", defaultValue = "no-client-id")
+    @ConfigProperty(name = "auth.proxy.oidc.client.id", defaultValue = "dummy-client-id")
     String clientId;
 
-    @ConfigProperty(name = "auth.proxy.oidc.client.secret", defaultValue = "no-secret")
+    @ConfigProperty(name = "auth.proxy.oidc.client.secret", defaultValue = "dummy-client-secret")
     String clientSecret;
 
     @ConfigProperty(name = "auth.proxy.oidc.redirect.uri", defaultValue = "http://localhost:8080/oidc/callback")

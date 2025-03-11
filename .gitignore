@@ -15,10 +15,9 @@ gradle-app.setting
 .gradletasknamecache
 
 # Eclipse Gradle plugin generated files
-# Eclipse Core
 .project
 .settings
-# JDT-specific (Eclipse Java Development Tools)
 .classpath
 
-*.class
+# Bin folder
+bin
