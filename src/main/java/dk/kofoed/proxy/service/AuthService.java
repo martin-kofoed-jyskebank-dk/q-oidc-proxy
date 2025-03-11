@@ -27,16 +27,19 @@ public class AuthService {
 
     private List<String> stateIds;
 
-    @ConfigProperty(name = "jb.auth.oidc.client.id", defaultValue = "no-client-id")
+    @ConfigProperty(name = "auth.proxy.oidc.response.type", defaultValue = "code")
+    String responseType;
+
+    @ConfigProperty(name = "auth.proxy.oidc.client.id", defaultValue = "no-client-id")
     String clientId;
 
-    @ConfigProperty(name = "jb.auth.oidc.client.secret", defaultValue = "no-secret")
+    @ConfigProperty(name = "auth.proxy.oidc.client.secret", defaultValue = "no-secret")
     String clientSecret;
 
-    @ConfigProperty(name = "jb.auth.oidc.redirect.uri", defaultValue = "http://localhost:8080/oidc/callback")
+    @ConfigProperty(name = "auth.proxy.oidc.redirect.uri", defaultValue = "http://localhost:8080/oidc/callback")
     String redirectUri;
 
-    @ConfigProperty(name = "jb.auth.oidc.provider.auth.uri", defaultValue = "http://localhost:8080")
+    @ConfigProperty(name = "auth.proxy.oidc.provider.auth.uri", defaultValue = "http://localhost:8080")
     String oidcAuthUri;
 
     @Inject
@@ -44,13 +47,14 @@ public class AuthService {
     OidcClient oidcClient;
 
     /**
-     * Fill in variable parts of the  template (AUTHENTICATION_OIDC_AUTH_URI_TEMPLATE environment variable).
+     * Fill in variable parts of the  template (OIDC_AUTH_URI_TEMPLATE environment variable).
      * Add state UUID to list of state IDs. 
      */
     public synchronized String buildAuthInitUri() {
         String stateId = UUID.randomUUID().toString();
         stateIds.add(stateId);
         return oidcAuthUri.formatted(
+            responseType,
             clientId,
             URLEncoder.encode(redirectUri, StandardCharsets.UTF_8),
             stateId

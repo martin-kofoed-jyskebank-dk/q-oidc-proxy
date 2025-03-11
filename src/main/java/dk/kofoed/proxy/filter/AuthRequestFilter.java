@@ -29,16 +29,16 @@ public class AuthRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthRequestFilter.class);
 
-    @ConfigProperty(name = "jb.auth.type", defaultValue = "UNKNOWN")
+    @ConfigProperty(name = "auth.proxy.type", defaultValue = "UNKNOWN")
     AuthType authType;
 
-    @ConfigProperty(name = "jb.auth.oidc.base.url")
+    @ConfigProperty(name = "auth.proxy.oidc.base.url")
     String oidcProviderBaseUri;
 
-    @ConfigProperty(name = "jb.auth.header.name")
+    @ConfigProperty(name = "auth.proxy.header.name")
     String headerName;
 
-    @ConfigProperty(name = "jb.auth.cookie.name")
+    @ConfigProperty(name = "auth.proxy.cookie.name")
     String cookieName;
 
     @Inject

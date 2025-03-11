@@ -35,22 +35,22 @@ public class OidcApi {
 
     private static final Logger logger = LoggerFactory.getLogger(OidcApi.class);
 
-    @ConfigProperty(name = "jb.auth.type", defaultValue = "UNKNOWN")
+    @ConfigProperty(name = "auth.proxy.type", defaultValue = "UNKNOWN")
     AuthType authType;
 
-    @ConfigProperty(name = "jb.auth.cookie.name")
+    @ConfigProperty(name = "auth.proxy.cookie.name")
     String cookieName;
 
-    @ConfigProperty(name = "jb.auth.frontend.redirect")
+    @ConfigProperty(name = "auth.proxy.frontend.redirect")
     String frontendRedirect;
 
-    @ConfigProperty(name = "jb.auth.cookie.domain")
+    @ConfigProperty(name = "auth.proxy.cookie.domain")
     String cookieDomain;
 
-    @ConfigProperty(name = "jb.auth.frontend.callback.param.name")
+    @ConfigProperty(name = "auth.proxy.frontend.callback.param.name")
     String callbackParamName;
 
-    @ConfigProperty(name = "jb.auth.cookie.samesite")
+    @ConfigProperty(name = "auth.proxy.cookie.samesite")
     SameSite sameSite;
 
     @Inject

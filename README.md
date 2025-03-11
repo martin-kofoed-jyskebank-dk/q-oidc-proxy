@@ -109,22 +109,28 @@ The name of the query string parameter used for passing auth code back to fronte
 
 This section lists environment variables relevant to the OIDC provider selected. 
 
-### `AUTHENTICATION_OIDC_PROVIDER_CONF_URL`
+### ``
+
+### `OIDC_PROVIDER_CONF_URL`
 
 Mandatory setting. Points to the .well-known URL of the OIDC provider. Example: to use Google, use this value: `https://accounts.google.com/.well-known/openid-configuration`.
 
-### `AUTHENTICATION_OIDC_AUTH_URI_TEMPLATE`
+### `OIDC_AUTH_URI_TEMPLATE`
 
-Used in conjunction with `AUTHENTICATION_OIDC_BASE_URL` to generate the full OIDC redirect URL. A simple string template where `%s` is replaced by actual values in the given order before being appended to the base URL. Defaults to `/auth?response_type=%s&client_id=%s&scope=openid&redirect_uri=%s&state=%s`. 
+Template used to generate full URL to authentication UI that the user will be redirected to. A simple string template where `%s` is replaced by actual values in the given order before being appended to the base URL. Defaults to `/auth?response_type=%s&client_id=%s&scope=openid&redirect_uri=%s&state=%s`. 
 
 URI has four variable parts, that are replaced with actual values in environment variables:
 
 | Value      | Description | Replaced with |
 | ---------- | ----------- | -------------- |
-| response_type | Must be supported by OIDC provider response types. Defaults to `code`. | `AUTHENTICATION_OIDC_RESPONSE_TYPE` |
-| client_id  | ID of the client as registered with the OIDC provider | `AUTHENTICATION_OIDC_CLIENT_ID` |
-| redirect_uri | URL-encoded uri that the OIDC provider should make its callback to | `AUTHENTICATION_OIDC_REDIRECT_URI` |
+| response_type | Must be supported by OIDC provider response types. Defaults to `code`. | `OIDC_RESPONSE_TYPE` |
+| client_id  | ID of the client as registered with the OIDC provider | `OIDC_CLIENT_ID` |
+| redirect_uri | URL-encoded uri that the OIDC provider should make its callback to | `OIDC_REDIRECT_URI` |
 | state | UUID to be validated when OIDC provider calls back | Generated |
+
+### `OIDC_CLIENT_SECRET`
+
+The client secret issued by the OIDC provider. 
 
 ## Miscellaneous settings
 

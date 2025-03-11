@@ -24,7 +24,7 @@ public class ClientUriFilter implements ClientRequestFilter {
     @Inject
     RestPathHelper pathHelper;
 
-    @ConfigProperty(name = "jb.auth.backend.base.url")
+    @ConfigProperty(name = "auth.proxy.backend.base.url")
     String backendBaseUrl;
 
     /**
