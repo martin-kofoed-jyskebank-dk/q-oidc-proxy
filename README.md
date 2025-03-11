@@ -34,7 +34,7 @@ Example payload returned in step 2:
 
 ```json
 {
-    "redirect_to": "https://auth-server-redhat-sso-x.corp.jyskebank.net/auth/realms/application-realm/protocol/openid-connect/auth?response_type=code&client_id=digikom-customercomm-frontend&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Foidc%2Fcallback&state=383fe246-c2e5-46f7-a9b3-b873fc047196"
+    "redirect_to": "https://acme.bigcorp.com/application-realm/protocol/openid-connect/auth?response_type=code&client_id=my-client-id&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Foidc%2Fcallback&state=383fe246-c2e5-46f7-a9b3-b873fc047196"
 }
 ```
 
