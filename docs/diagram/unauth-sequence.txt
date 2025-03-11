@@ -1,0 +1,35 @@
+# Paste this into https://sequencediagram.org/
+
+title Unauthenticated
+actor User #green
+User->AuthRequestFilter:/api/resource/a
+activate AuthRequestFilter #lightgreen
+AuthRequestFilter->AuthRequestFilter:No auth code
+AuthRequestFilter->AuthService:Get redirect url
+activate AuthService #lightgreen
+AuthService->AuthService: random UUID
+AuthService->AuthRequestFilter: OIDC redirect URL\nwith callback info
+deactivate AuthService
+AuthRequestFilter->User: 401 Unauthenticated\nwith redirect data
+deactivate AuthRequestFilter
+User->OIDC Provider: Enter userid/password
+activate OIDC Provider #lightgreen
+OIDC Provider->OidcApi: /oidc/callback
+deactivate OIDC Provider
+activate OidcApi #lightgreen
+OidcApi->AuthService: Check random UUID (state)
+activate AuthService #lightgreen
+AuthService->OidcApi: State check result
+deactivate AuthService
+OidcApi-#redxUser: State UUID mismatch
+OidcApi->AuthService: Exchange auth code for token
+activate AuthService #lightgreen
+AuthService->OIDC Provider: Call /token
+activate OIDC Provider #lightgreen
+OIDC Provider->AuthService: access_token
+deactivate OIDC Provider
+AuthService->OidcApi: access_token
+deactivate AuthService
+OidcApi->TokenCache: cache key/value\n(auth code/token)
+OidcApi->User: authorization code - 302 redirect - cookie or querystring param
+deactivate OidcApi

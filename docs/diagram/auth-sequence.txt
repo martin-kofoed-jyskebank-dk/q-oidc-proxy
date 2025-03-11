@@ -1,0 +1,28 @@
+# Paste this into https://sequencediagram.org/
+
+title Authenticated
+actor User #green
+User->AuthRequestFilter:/api/resource/a
+activate AuthRequestFilter #lightgreen
+AuthRequestFilter->AuthRequestFilter:Got auth code
+AuthRequestFilter->TokenCache: Get token for auth code
+activate TokenCache #lightgreen
+TokenCache-#redxAuthRequestFilter: Token not found
+AuthRequestFilter-#redxUser: Redirect unauth
+TokenCache->AuthRequestFilter: Token
+opt Token expired
+deactivate TokenCache
+AuthRequestFilter->OIDC Provider: refresh token
+activate OIDC Provider #lightgreen
+OIDC Provider-#redxAuthRequestFilter: refresh token expired
+AuthRequestFilter-#redxUser: Redirect unauth
+OIDC Provider->AuthRequestFilter: access_token
+deactivate OIDC Provider
+AuthRequestFilter->TokenCache: put token
+end
+AuthRequestFilter->AuthRequestFilter: Set token on\nAuthorization header
+AuthRequestFilter->ProxyApi: Call backend resource /resource/a
+deactivate AuthRequestFilter
+activate ProxyApi #lightgreen
+ProxyApi->User: Data
+deactivate ProxyApi
