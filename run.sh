@@ -17,7 +17,7 @@ export OIDC_CLIENT_SECRET=my-client-secret
 export OIDC_REDIRECT_URI=http://localhost:8080/oidc/callback
 
 export BACKEND_HOST_BASE_URL=http://localhost:8081
-export BACKEND_HEADER_PROPAGATION=Authorization, X-Correlation-Id
+export BACKEND_HEADER_PROPAGATION=Authorization,X-Correlation-Id
 
 # Run quarkus in dev mode
 quarkus dev 
