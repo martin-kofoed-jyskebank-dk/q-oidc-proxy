@@ -2,6 +2,8 @@ plugins {
     id 'java'
     id 'io.quarkus'
     id 'eclipse'
+    id 'checkstyle'
+    id 'jacoco'
 }
 
 repositories {
@@ -10,14 +12,20 @@ repositories {
 }
 
 dependencies {
+    // Platform:
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-rest'
+    implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-smallrye-jwt'
+    implementation 'io.quarkus:quarkus-smallrye-jwt-build'
+
+    // Testing:
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
 }
 
-group 'org.acme'
+group 'dk.kofoed'
 version '1.0.0-SNAPSHOT'
 
 java {

@@ -34,11 +34,11 @@ Example payload returned in step 2:
 
 ```json
 {
-    "redirect_to": "https://acme.bigcorp.com/application-realm/protocol/openid-connect/auth?response_type=code&client_id=my-client-id&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Foidc%2Fcallback&state=383fe246-c2e5-46f7-a9b3-b873fc047196"
+    "redirect_to": "https://oidc.bigcorp.com/application-realm/protocol/openid-connect/auth?response_type=code&client_id=my-client-id&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Foidc%2Fcallback&state=383fe246-c2e5-46f7-a9b3-b873fc047196"
 }
 ```
 
-If the cached token in step (9) is expired, we will make a call to the OIDC provider using the refresh token to acquire a new access token. If this step fails, we will remove the cached entry and repeat from step 1. 
+If the cached token in step (9) has expired, we will make a call to the OIDC provider using the refresh token to acquire a new access token. If this step fails, we will remove the cached entry and repeat from step 1. 
 
 If backend uses role-based authorization it may send `403 Forbidden` responses. These will make it all the way back to the client. 
 
