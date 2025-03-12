@@ -147,9 +147,9 @@ Mandatory setting. Points to the .well-known URL of the OIDC provider. Example: 
 
 ### `OIDC_AUTH_URI_TEMPLATE`
 
-Template used to generate full URL to authentication UI that the user will be redirected to. A simple string template where `%s` is replaced by actual values in the given order before being appended to the base URL. Defaults to `/auth?response_type=%s&client_id=%s&scope=openid&redirect_uri=%s&state=%s`. 
+Template used to generate full URL to authentication UI that the user will be redirected to. A simple string template where `%s` is replaced by actual values in the given order before being appended to the base URL. Defaults to `?response_type=%s&client_id=%s&scope=openid&redirect_uri=%s&state=%s&code_challenge=%s&code_challenge_method=S256`. 
 
-URI has four variable parts, that are replaced with actual values in environment variables:
+URI has five variable parts that are replaced with actual values found in environment variables:
 
 | Value      | Description | Replaced with |
 | ---------- | ----------- | -------------- |
@@ -157,6 +157,7 @@ URI has four variable parts, that are replaced with actual values in environment
 | client_id  | ID of the client as registered with the OIDC provider | `OIDC_CLIENT_ID` |
 | redirect_uri | URL-encoded uri that the OIDC provider should make its callback to | `OIDC_REDIRECT_URI` |
 | state | UUID to be validated when OIDC provider calls back | Generated |
+| code_challenge | A code challenge that the OIDC provider will use to verify against when exchanging  | Generated |
 
 ### `OIDC_CLIENT_SECRET`
 

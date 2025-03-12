@@ -6,6 +6,7 @@
         ],
         "Description": "Client for client credentials flow",
         "AllowedGrantTypes": [
+            "authorization_code",
             "client_credentials"
         ],
         "RedirectUris": [

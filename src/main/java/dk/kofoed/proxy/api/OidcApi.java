@@ -35,7 +35,7 @@ public class OidcApi {
 
     private static final Logger logger = LoggerFactory.getLogger(OidcApi.class);
 
-    @ConfigProperty(name = "auth.proxy.type", defaultValue = "UNKNOWN")
+    @ConfigProperty(name = "auth.proxy.type")
     AuthType authType;
 
     @ConfigProperty(name = "auth.proxy.cookie.name")

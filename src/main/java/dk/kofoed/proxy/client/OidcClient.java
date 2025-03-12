@@ -2,8 +2,10 @@ package dk.kofoed.proxy.client;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -13,16 +15,23 @@ import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import dk.kofoed.proxy.client.model.AccessTokenResponse;
+import dk.kofoed.proxy.client.model.OpenIdConfigurationResponse;
 import dk.kofoed.proxy.exception.OidcProviderException;
 
 @RegisterRestClient(configKey = "oidc-provider")
 public interface OidcClient {
+
+    @GET
+    @Path("/.well-known/openid-configuration")
+    @Produces(MediaType.APPLICATION_JSON)
+    public OpenIdConfigurationResponse getOpenIdConfiguration();
     
     @POST
-    @Path("/token")
+    @Path("{tokenEndpoint}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public AccessTokenResponse getAccessToken(
+        @PathParam("tokenEndpoint") String tokenEndpoint,
         @FormParam("grant_type") String grantType,
         @FormParam("client_id") String clientId,
         @FormParam("client_secret") String clientSecret,
@@ -31,10 +40,11 @@ public interface OidcClient {
     );
 
     @POST
-    @Path("/token")
+    @Path("{tokenEndpoint}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<AccessTokenResponse> refreshAccessToken(
+        @PathParam("tokenEndpoint") String tokenEndpoint,
         @FormParam("grant_type") String grantType,
         @FormParam("client_id") String clientId,
         @FormParam("client_secret") String clientSecret,

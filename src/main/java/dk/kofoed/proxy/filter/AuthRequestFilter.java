@@ -29,7 +29,7 @@ public class AuthRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthRequestFilter.class);
 
-    @ConfigProperty(name = "auth.proxy.type", defaultValue = "UNKNOWN")
+    @ConfigProperty(name = "auth.proxy.type")
     AuthType authType;
 
     @ConfigProperty(name = "auth.proxy.oidc.base.url")
@@ -148,7 +148,7 @@ public class AuthRequestFilter {
         URI oidcProvider = null;
         String url = "";
         try {
-            url = oidcProviderBaseUri + authService.buildAuthInitUri();
+            url = authService.buildAuthInitUri();
             oidcProvider = new URI(url);
         } catch (URISyntaxException e) {
             return badRequest("Could not parse OIDC Provider URL: " + url);

@@ -5,9 +5,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 
 import io.smallrye.mutiny.Uni;
@@ -18,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import dk.kofoed.proxy.client.OidcClient;
 import dk.kofoed.proxy.client.model.AccessTokenResponse;
+import dk.kofoed.proxy.client.model.OpenIdConfigurationResponse;
+import dk.kofoed.proxy.domain.AuthenticationSessionData;
 import dk.kofoed.proxy.exception.OidcProviderException;
 import dk.kofoed.proxy.exception.ProxyClientException;
 
@@ -26,7 +25,7 @@ public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
-    private List<String> stateIds;
+    private OpenIdConfigurationResponse openIdConfiguration;
 
     @ConfigProperty(name = "auth.proxy.oidc.response.type", defaultValue = "code")
     String responseType;
@@ -40,12 +39,18 @@ public class AuthService {
     @ConfigProperty(name = "auth.proxy.oidc.redirect.uri", defaultValue = "http://localhost:8080/oidc/callback")
     String redirectUri;
 
-    @ConfigProperty(name = "auth.proxy.oidc.provider.auth.uri", defaultValue = "http://localhost:8080")
+    @ConfigProperty(name = "auth.proxy.oidc.provider.auth.uri", defaultValue = "-")
     String oidcAuthUri;
+
+    @ConfigProperty(name = "auth.proxy.oidc.base.url")
+    String oidcBaseUri;
 
     @Inject
     @RestClient
     OidcClient oidcClient;
+
+    @Inject
+    ProofKeyCodeExchangeService pkceService;
 
     /**
      * Fill in variable parts of the  template (OIDC_AUTH_URI_TEMPLATE environment variable).
@@ -53,13 +58,17 @@ public class AuthService {
      */
     public synchronized String buildAuthInitUri() {
         String stateId = UUID.randomUUID().toString();
-        stateIds.add(stateId);
-        return oidcAuthUri.formatted(
+        AuthenticationSessionData sessionData = pkceService.buildNewSessionData(stateId);
+
+        String authInitRedirectUrl = openIdConfiguration.authorizationEndpoint() + oidcAuthUri.formatted(
             responseType,
             clientId,
             URLEncoder.encode(redirectUri, StandardCharsets.UTF_8),
-            stateId
+            sessionData.state(),
+            sessionData.codeChallenge()
         );
+
+        return authInitRedirectUrl;
     }
 
     /**
@@ -67,12 +76,7 @@ public class AuthService {
      * Remove UUID once checked, since IDs are only valid once per flow.
      */
     public boolean stateIdOk(String id) {
-        if (this.stateIds.contains(id)) {
-            this.stateIds.remove(id);
-            return true;
-        } else {
-            return false;
-        }
+        return pkceService.containsState(id);
     }
     
     /**
@@ -85,6 +89,7 @@ public class AuthService {
 
         try {
             return oidcClient.getAccessToken(
+                buildTokenEndpoint(openIdConfiguration.tokenEndpoint()),
                 "authorization_code",
                 clientId,
                 clientSecret,
@@ -109,6 +114,7 @@ public class AuthService {
         logger.info("Refreshing access_token ...");
 
         return oidcClient.refreshAccessToken(
+            buildTokenEndpoint(openIdConfiguration.tokenEndpoint()),
             "refresh_token",
             clientId,
             clientSecret,
@@ -119,9 +125,19 @@ public class AuthService {
         });
     } 
 
+    public String buildTokenEndpoint(String fullyQualifiedEndpoint) {
+        String tokenEndpoint = fullyQualifiedEndpoint.substring(oidcBaseUri.length() + 1);
+        logger.info("Token endpoint: [{}]", tokenEndpoint);
+        return tokenEndpoint;
+    }
+
+    /**
+     * Do initial tasks to get up and running.
+     */
     @PostConstruct
     public void init() {
-        this.stateIds = Collections.synchronizedList(new LinkedList<>());
+        this.openIdConfiguration = oidcClient.getOpenIdConfiguration();
+        logger.info("Got OpenID Configuration: [{}]", openIdConfiguration);
     }
 
 }

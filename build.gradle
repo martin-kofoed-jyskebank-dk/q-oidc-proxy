@@ -36,7 +36,7 @@ java {
 
 test {
     systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
-    systemProperty "OIDC_PROVIDER_CONF_URL", "http://localhost:9090/.well-known/openid-configuration"
+    systemProperty "OIDC_PROVIDER_BASE_URL", "http://localhost:9090"
 }
 compileJava {
     options.encoding = 'UTF-8'
