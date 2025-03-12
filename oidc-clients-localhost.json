@@ -1,0 +1,18 @@
+[
+    {
+        "ClientId": "dummy-client-id",
+        "ClientSecrets": [
+            "dummy-client-secret"
+        ],
+        "Description": "Client for client credentials flow",
+        "AllowedGrantTypes": [
+            "client_credentials"
+        ],
+        "RedirectUris": [
+            "http://localhost:8080/oidc/callback"
+        ],
+        "AllowedScopes": [
+            "openid"
+        ]
+    }
+]

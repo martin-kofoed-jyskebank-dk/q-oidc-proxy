@@ -5,10 +5,42 @@
 
 A simple, fast, configurable OIDC proxy for plug-in token-based security.
 
-This application is built for running in a container image, ideally as a [kubernetes sidecar](https://betterprogramming.pub/kubernetes-authentication-sidecars-a-revelation-in-microservice-architecture-12c4608189ab). However, it could just as easily run as a standalone app.
+This application is typically for use cases where a legacy frontend application needs to utilize modern, token-based authentication/authorization infrastructure with as little hassle as possible. It was originally built for running on a container-based platform, so every aspect is configurable using environment variables. This project is a spin-off of a similar system that is currently running in production. Ideally to be run as a [kubernetes sidecar](https://betterprogramming.pub/kubernetes-authentication-sidecars-a-revelation-in-microservice-architecture-12c4608189ab). However, it could just as easily run as a standalone app.
 
 
 When configured using environment variables, it will serve as a reverse proxy and token cache between a frontend user and any backend application requiring JWT bearer Authorization headers.
+
+## Table of contents
+
+- [QProxy](#qproxy)
+  - [Table of contents](#table-of-contents)
+  - [Architecture](#architecture)
+    - [Overview](#overview)
+    - [Steps involved](#steps-involved)
+    - [More information](#more-information)
+  - [Sequence diagrams](#sequence-diagrams)
+    - [First request](#first-request)
+    - [Subsequent requests](#subsequent-requests)
+- [Configuration](#configuration)
+  - [Core config](#core-config)
+    - [`AUTHENTICATION_TYPE`](#authentication_type)
+    - [`AUTHENTICATION_COOKIE_NAME`](#authentication_cookie_name)
+    - [`AUTHENTICATION_COOKIE_DOMAIN`](#authentication_cookie_domain)
+    - [`AUTHENTICATION_COOKIE_SAMESITE`](#authentication_cookie_samesite)
+    - [`AUTHENTICATION_BACKEND_HEADER_NAME`](#authentication_backend_header_name)
+    - [`AUTHENTICATION_FRONTEND_REDIRECT`](#authentication_frontend_redirect)
+    - [`AUTHENTICATION_FRONTEND_CALLBACK_PARAM`](#authentication_frontend_callback_param)
+  - [OIDC Provider configuration](#oidc-provider-configuration)
+    - [`OIDC_PROVIDER_BASE_URL`](#oidc_provider_base_url)
+    - [`OIDC_AUTH_URI_TEMPLATE`](#oidc_auth_uri_template)
+    - [`OIDC_CLIENT_SECRET`](#oidc_client_secret)
+  - [Miscellaneous settings](#miscellaneous-settings)
+    - [`BACKEND_HEADER_PROPAGATION`](#backend_header_propagation)
+    - [`AUTHENTICATION_CORS_ALLOW_ORIGINS`](#authentication_cors_allow_origins)
+    - [`BACKEND_HOST_BASE_URL`](#backend_host_base_url)
+- [Run on localhost](#run-on-localhost)
+- [Quarkus](#quarkus)
+
 
 ## Architecture
 
@@ -109,9 +141,7 @@ The name of the query string parameter used for passing auth code back to fronte
 
 This section lists environment variables relevant to the OIDC provider selected. 
 
-### ``
-
-### `OIDC_PROVIDER_CONF_URL`
+### `OIDC_PROVIDER_BASE_URL`
 
 Mandatory setting. Points to the .well-known URL of the OIDC provider. Example: to use Google, use this value: `https://accounts.google.com/.well-known/openid-configuration`.
 
@@ -145,6 +175,10 @@ Comma-separated list of allowed origins. Defaults to `/https://([a-z0-9\\-_]+)\\
 ### `BACKEND_HOST_BASE_URL`
 
 Mandatory value. URL and port for protected backend ressource. Please note that uri path must always begin with an `/api` node. This node will be removed before making the backend call. 
+
+# Run on localhost
+
+Running 
 
 
 # Quarkus
