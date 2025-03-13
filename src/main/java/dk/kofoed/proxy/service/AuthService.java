@@ -150,7 +150,7 @@ public class AuthService {
         if (this.openIdConfiguration.issuer() == null) {
             throw new OidcProviderException("Could not load OpenID configuration for base URL [" + oidcBaseUrl + "]", 500);
         }
-    logger.info("Got OpenID Configuration: [{}]", openIdConfiguration);
+        logger.info("Got OpenID Configuration: [{}]", openIdConfiguration);
     }
 
 }
