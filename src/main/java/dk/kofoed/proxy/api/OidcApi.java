@@ -66,14 +66,9 @@ public class OidcApi {
     @GET
     public Response oauthCallback(
         @QueryParam("state") String state,
-        @QueryParam("session_state") String sessionState,
         @QueryParam("code") String authCode) throws URISyntaxException {
         
-        logger.info("Got callback from OIDC provider. State: [{}]. Session state: [{}]. Authorization code: [{}].", 
-            state, 
-            sessionState, 
-            authCode
-        );
+        logger.info("Got callback from OIDC provider. State: [{}]. Authorization code: [{}].", state, authCode);
 
         // check if state UUID is one issued by us, otherwise throw exception:
         if (!authService.stateIdOk(state)) {
@@ -81,7 +76,7 @@ public class OidcApi {
         }
 
         // Exchange auth token for a full access token / JWT and add to cache
-        AccessTokenResponse accessToken = authService.getAccessToken(authCode);
+        AccessTokenResponse accessToken = authService.getAccessToken(authCode, state);
         if (accessToken == null) {
             return Response.serverError().build();
         } else {
@@ -90,7 +85,7 @@ public class OidcApi {
 
         // depending on which auth type is selected, return authentication token to client
         if (authType == AuthType.COOKIE) {
-            NewCookie cookie = getCookie(authCode);
+            NewCookie cookie = buildCookie(authCode);
             return Response.status(Status.FOUND).location(new URI(frontendRedirect)).cookie(cookie).build();
         }
         if (authType == AuthType.BEARER) {
@@ -125,7 +120,7 @@ public class OidcApi {
         return sb.toString();
     }
 
-    private NewCookie getCookie(String authCode) {
+    private NewCookie buildCookie(String authCode) {
         return new NewCookie.Builder(cookieName)
             .domain(cookieDomain)
             .path("/")

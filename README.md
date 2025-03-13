@@ -3,17 +3,13 @@
 
 # QProxy
 
-A simple, fast, configurable OIDC proxy for plug-in token-based security.
-
-This application is typically for use cases where a legacy frontend application needs to utilize modern, token-based authentication/authorization infrastructure with as little hassle as possible. It was originally built for running on a container-based platform, so every aspect is configurable using environment variables. This project is a spin-off of a similar system that is currently running in production. Ideally to be run as a [kubernetes sidecar](https://betterprogramming.pub/kubernetes-authentication-sidecars-a-revelation-in-microservice-architecture-12c4608189ab). However, it could just as easily run as a standalone app.
-
-
-When configured using environment variables, it will serve as a reverse proxy and token cache between a frontend user and any backend application requiring JWT bearer Authorization headers.
+A simple, fast, configurable OIDC proxy for plug-in token-based security. 
 
 ## Table of contents
 
 - [QProxy](#qproxy)
   - [Table of contents](#table-of-contents)
+  - [Introduction](#introduction)
   - [Architecture](#architecture)
     - [Overview](#overview)
     - [Steps involved](#steps-involved)
@@ -41,6 +37,13 @@ When configured using environment variables, it will serve as a reverse proxy an
 - [Run on localhost](#run-on-localhost)
 - [Quarkus](#quarkus)
 
+## Introduction
+
+This application is typically for use cases where a legacy frontend application needs to utilize modern, token-based authentication/authorization infrastructure with as little hassle as possible. It was originally built for running on a container-based platform like Kubernetes, so every aspect is configurable using environment variables. 
+
+Ideally to be run as a [kubernetes sidecar](https://betterprogramming.pub/kubernetes-authentication-sidecars-a-revelation-in-microservice-architecture-12c4608189ab). However, it runs just as well as a standalone app.
+
+When configured using environment variables, it will serve as a reverse proxy and token cache between a frontend user and any backend application requiring JWT bearer Authorization headers. It will interact with any OIDC Provider using the [Authorization Code Flow](https://auth0.com/docs/authenticate/login/oidc-conformant-authentication/oidc-adoption-auth-code-flow)
 
 ## Architecture
 
@@ -149,11 +152,10 @@ Mandatory setting. Points to the .well-known URL of the OIDC provider. Example: 
 
 Template used to generate full URL to authentication UI that the user will be redirected to. A simple string template where `%s` is replaced by actual values in the given order before being appended to the base URL. Defaults to `?response_type=%s&client_id=%s&scope=openid&redirect_uri=%s&state=%s&code_challenge=%s&code_challenge_method=S256`. 
 
-URI has five variable parts that are replaced with actual values found in environment variables:
+URI has four variable parts that are replaced with actual values found in environment variables:
 
 | Value      | Description | Replaced with |
 | ---------- | ----------- | -------------- |
-| response_type | Must be supported by OIDC provider response types. Defaults to `code`. | `OIDC_RESPONSE_TYPE` |
 | client_id  | ID of the client as registered with the OIDC provider | `OIDC_CLIENT_ID` |
 | redirect_uri | URL-encoded uri that the OIDC provider should make its callback to | `OIDC_REDIRECT_URI` |
 | state | UUID to be validated when OIDC provider calls back | Generated |
@@ -179,8 +181,19 @@ Mandatory value. URL and port for protected backend ressource. Please note that 
 
 # Run on localhost
 
-Running 
+Prereq: Podman or docker must be installed.
 
+Getting up and running on localhost is quite easy thanks to the [OIDC Server Mock](https://github.com/Soluto/oidc-server-mock) docker image. Please follow these steps:
+
+1. In a command line, `cd` to `<project_root>/oidc`
+2. (optional) Edit settings files in `/oidc` directory.
+3. Execute `./run-podman-oidc.sh`. This should pull image, start server, and tail server log output.
+4. Launch another command line console and execute `run.sh` in project root. Proxy server should start using the default settings
+5. Call any protected endpoint behind the `/api` uri node. For test purposes paste any URL, like `http:localhost:8080/api/testing`, into a browser. This should return a JSON object with a `redirect_to` URL. 
+6. Paste this URL into the same browser window. 
+7. Enter credentials: `user`:`pass` (or whatever has been set up in the `/oidc/oidc-users-localhost.json` file)
+
+Depending on the `AUTHENTICATION_TYPE` selected, an auth code will be transferred to the URL defined in `AUTHENTICATION_FRONTEND_REDIRECT`.
 
 # Quarkus
 

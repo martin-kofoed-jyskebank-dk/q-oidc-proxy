@@ -35,6 +35,14 @@ public class ProofKeyCodeExchangeService {
     public boolean containsState(String stateId) {
         return this.sessionDataMap.containsKey(stateId);
     }
+
+    public String getCodeVerifier(String state) {
+        return this.sessionDataMap.get(state).codeVerifier();
+    }
+
+    public void removeSessionData(String state) {
+        this.sessionDataMap.remove(state);
+    }
                 
     private String generateCodeVerifier() {
         SecureRandom random = new SecureRandom();

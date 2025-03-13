@@ -1,6 +1,7 @@
 package dk.kofoed.proxy.client;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Encoded;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -27,24 +28,25 @@ public interface OidcClient {
     public OpenIdConfigurationResponse getOpenIdConfiguration();
     
     @POST
-    @Path("{tokenEndpoint}")
+    @Path("/{tokenEndpoint}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public AccessTokenResponse getAccessToken(
-        @PathParam("tokenEndpoint") String tokenEndpoint,
+        @PathParam("tokenEndpoint") @Encoded String tokenEndpoint,
         @FormParam("grant_type") String grantType,
         @FormParam("client_id") String clientId,
         @FormParam("client_secret") String clientSecret,
         @FormParam("code") String authCode,
+        @FormParam("code_verifier") String codeVerifier,
         @FormParam("redirect_uri") String redirectUri
     );
 
     @POST
-    @Path("{tokenEndpoint}")
+    @Path("/{tokenEndpoint}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<AccessTokenResponse> refreshAccessToken(
-        @PathParam("tokenEndpoint") String tokenEndpoint,
+        @PathParam("tokenEndpoint") @Encoded String tokenEndpoint,
         @FormParam("grant_type") String grantType,
         @FormParam("client_id") String clientId,
         @FormParam("client_secret") String clientSecret,

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 public record OpenIdConfigurationResponse(
 
+    String issuer,
     @JsonProperty("authorization_endpoint")
     String authorizationEndpoint,
     @JsonProperty("token_endpoint")

@@ -1,12 +1,12 @@
 package dk.kofoed.proxy.service;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import io.quarkus.runtime.Startup;
 import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -27,9 +27,6 @@ public class AuthService {
 
     private OpenIdConfigurationResponse openIdConfiguration;
 
-    @ConfigProperty(name = "auth.proxy.oidc.response.type", defaultValue = "code")
-    String responseType;
-
     @ConfigProperty(name = "auth.proxy.oidc.client.id", defaultValue = "dummy-client-id")
     String clientId;
 
@@ -39,11 +36,11 @@ public class AuthService {
     @ConfigProperty(name = "auth.proxy.oidc.redirect.uri", defaultValue = "http://localhost:8080/oidc/callback")
     String redirectUri;
 
-    @ConfigProperty(name = "auth.proxy.oidc.provider.auth.uri", defaultValue = "-")
+    @ConfigProperty(name = "auth.proxy.oidc.provider.auth.uri")
     String oidcAuthUri;
 
     @ConfigProperty(name = "auth.proxy.oidc.base.url")
-    String oidcBaseUri;
+    String oidcBaseUrl;
 
     @Inject
     @RestClient
@@ -61,11 +58,10 @@ public class AuthService {
         AuthenticationSessionData sessionData = pkceService.buildNewSessionData(stateId);
 
         String authInitRedirectUrl = openIdConfiguration.authorizationEndpoint() + oidcAuthUri.formatted(
-            responseType,
             clientId,
-            URLEncoder.encode(redirectUri, StandardCharsets.UTF_8),
             sessionData.state(),
-            sessionData.codeChallenge()
+            sessionData.codeChallenge(),
+            URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
         );
 
         return authInitRedirectUrl;
@@ -83,19 +79,26 @@ public class AuthService {
      * Exhange an auth token with a full access_token by calling OIDC provider token endpoint
      * using <code>authorization_code</code> grant type.
      */
-    public AccessTokenResponse getAccessToken(String authCode) {
+    public AccessTokenResponse getAccessToken(String authCode, String state) {
 
-        logger.info("Getting access_token for auth code [{}]", authCode);
+        String codeVerifier = pkceService.getCodeVerifier(state);
+
+        logger.info("Getting access_token for auth code [{}]. Code verifier: [{}]", authCode, codeVerifier);
+
+        logger.info("Client ID: [{}]. Client secret: [{}]. Redirect uri: [{}].", clientId, clientSecret, redirectUri);
 
         try {
-            return oidcClient.getAccessToken(
+            AccessTokenResponse response = oidcClient.getAccessToken(
                 buildTokenEndpoint(openIdConfiguration.tokenEndpoint()),
                 "authorization_code",
                 clientId,
                 clientSecret,
                 authCode,
+                codeVerifier,
                 redirectUri
             );
+            pkceService.removeSessionData(state);
+            return response;
         } catch (OidcProviderException e) {
             logger.error("Could not retrieve an access token from OIDC provider. Error code: [{}]. Message: [{}]", 
                 e.getErrorCode(), 
@@ -125,19 +128,29 @@ public class AuthService {
         });
     } 
 
-    public String buildTokenEndpoint(String fullyQualifiedEndpoint) {
-        String tokenEndpoint = fullyQualifiedEndpoint.substring(oidcBaseUri.length() + 1);
-        logger.info("Token endpoint: [{}]", tokenEndpoint);
-        return tokenEndpoint;
+    private String buildTokenEndpoint(String fullyQualifiedEndpoint) {
+        return fullyQualifiedEndpoint.substring(oidcBaseUrl.length() + 1);
     }
 
     /**
-     * Do initial tasks to get up and running.
+     * Load OIDC configuration for selected endpoint. Fail startup if loading fails.
      */
-    @PostConstruct
+    @Startup
     public void init() {
-        this.openIdConfiguration = oidcClient.getOpenIdConfiguration();
-        logger.info("Got OpenID Configuration: [{}]", openIdConfiguration);
+        try {
+            this.openIdConfiguration = oidcClient.getOpenIdConfiguration();
+        } catch (Exception e) {
+            logger.error(
+                "Could not load openid-configuration from .well-known uri for base URL: [{}]. Message: [{}]", 
+                oidcBaseUrl, 
+                e.getMessage()
+            );
+            throw new OidcProviderException("Could not load OpenID configuration for base URL [" + oidcBaseUrl + "]", 500);
+        }
+        if (this.openIdConfiguration.issuer() == null) {
+            throw new OidcProviderException("Could not load OpenID configuration for base URL [" + oidcBaseUrl + "]", 500);
+        }
+    logger.info("Got OpenID Configuration: [{}]", openIdConfiguration);
     }
 
 }
