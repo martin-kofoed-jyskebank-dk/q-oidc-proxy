@@ -56,17 +56,9 @@ public class AuthService {
     public synchronized String buildAuthInitUri() {
         String stateId = UUID.randomUUID().toString();
         AuthenticationSessionData sessionData = pkceService.buildNewSessionData(stateId);
-
-        String authInitRedirectUrl = openIdConfiguration.authorizationEndpoint() + oidcAuthUri.formatted(
-            clientId,
-            sessionData.state(),
-            sessionData.codeChallenge(),
-            URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
-        );
-
-        return authInitRedirectUrl;
+        return openIdConfiguration.authorizationEndpoint() + doVarSubstitution(oidcAuthUri, sessionData); 
     }
-
+        
     /**
      * Check if a given state UUID was created as a result of our own authorization code flow.
      * Remove UUID once checked, since IDs are only valid once per flow.
@@ -75,6 +67,11 @@ public class AuthService {
         return pkceService.containsState(id);
     }
     
+    private String doVarSubstitution(String authUriTemplate, AuthenticationSessionData sessionData) {
+
+        return "";
+    }
+
     /**
      * Exhange an auth token with a full access_token by calling OIDC provider token endpoint
      * using <code>authorization_code</code> grant type.

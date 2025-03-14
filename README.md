@@ -146,20 +146,22 @@ This section lists environment variables relevant to the OIDC provider selected.
 
 ### `OIDC_PROVIDER_BASE_URL`
 
-Mandatory setting. Points to the .well-known URL of the OIDC provider. Example: to use Google, use this value: `https://accounts.google.com/.well-known/openid-configuration`.
+Mandatory setting. Points to root URL of your OIDC provider from where .well-known config can be found. Example: to use Google, use this value: `https://accounts.google.com`. OpenID config must open in a browser when appending `/.well-known/openid-configuration` to this value.
 
 ### `OIDC_AUTH_URI_TEMPLATE`
 
-Template used to generate full URL to authentication UI that the user will be redirected to. A simple string template where `%s` is replaced by actual values in the given order before being appended to the base URL. Defaults to `?response_type=%s&client_id=%s&scope=openid&redirect_uri=%s&state=%s&code_challenge=%s&code_challenge_method=S256`. 
+Only change this if you really have to. URI snippet appended to authorization endpoint that the user will be redirected to for authentication. Template uses Mustache syntax for variable substitution. Template defaults to this value: 
 
-URI has four variable parts that are replaced with actual values found in environment variables:
+`?response_type=code&client_id={{clientId}}&scope=openid&state={{state}}&code_challenge={{codeChallenge}}&code_challenge_method=S256&redirect_uri={{redirectUri}}` 
+
+URI has four variable parts that are replaced with either generated values or environment vars:
 
 | Value      | Description | Replaced with |
 | ---------- | ----------- | -------------- |
-| client_id  | ID of the client as registered with the OIDC provider | `OIDC_CLIENT_ID` |
-| redirect_uri | URL-encoded uri that the OIDC provider should make its callback to | `OIDC_REDIRECT_URI` |
+| clientId  | ID of the client as registered with the OIDC provider | `OIDC_CLIENT_ID` |
+| redirectUri | URL-encoded uri that the OIDC provider should make its callback to | `OIDC_REDIRECT_URI` |
 | state | UUID to be validated when OIDC provider calls back | Generated |
-| code_challenge | A code challenge that the OIDC provider will use to verify against when exchanging  | Generated |
+| codeChallenge | A code challenge that the OIDC provider will use to verify against when asking for a token | Generated |
 
 ### `OIDC_CLIENT_SECRET`
 
