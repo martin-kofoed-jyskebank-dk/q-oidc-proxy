@@ -39,15 +39,13 @@ A simple, fast, configurable OIDC proxy for plug-in token-based security.
 
 ## Introduction
 
-This application is typically for use cases where a legacy frontend application needs to utilize modern, token-based authentication/authorization infrastructure with as little hassle as possible. It was originally built for running on a container-based platform like Kubernetes, so every aspect is configurable using environment variables. 
+This application is typically for use cases where a legacy backend application with pseudo endpoint security (or no security at all) needs to be upgraded to using modern, token-based authentication/authorization. Instead of writing new code for handling key exchange into every backend, QProxy can be plugged in between frontend and backend. It requires very little change to existing frontend and backend applications, and since it was originally built for running on container-based platforms like Kubernetes, every aspect is configurable using environment variables. 
 
-Ideally to be run as a [kubernetes sidecar](https://betterprogramming.pub/kubernetes-authentication-sidecars-a-revelation-in-microservice-architecture-12c4608189ab). However, it runs just as well as a standalone app.
-
-When configured using environment variables, it will serve as a reverse proxy and token cache between a frontend user and any backend application requiring JWT bearer Authorization headers. It will interact with any OIDC Provider using the [Authorization Code Flow](https://auth0.com/docs/authenticate/login/oidc-conformant-authentication/oidc-adoption-auth-code-flow)
+When correctly configured, QProxy will serve as a reverse proxy and token cache between a frontend client and any backend application requiring JWT bearer Authorization headers. It will interact with any OIDC Provider using the [Authorization Code Flow](https://auth0.com/docs/authenticate/login/oidc-conformant-authentication/oidc-adoption-auth-code-flow) and take care of token refresh.
 
 ## Architecture
 
-When an end user wants to interact with any frontend application that communicates with a backend app, this auth proxy can be deployed together with the backend app in the same kubernetes pod. The basic idea behind the *sidecar* pattern is to take advantage of the fact that containers within the same pods share the same network. Backend app does not have any routes for incoming traffic, communication between auth proxy and backend is strictly on localhost interface. 
+When an end user wants to interact with any frontend application that communicates with a backend app, this auth proxy can be deployed together with the backend app in the same kubernetes pod. The basic idea behind the [sidecar pattern](https://betterprogramming.pub/kubernetes-authentication-sidecars-a-revelation-in-microservice-architecture-12c4608189ab) is to take advantage of the fact that containers within the same pods share the same network. Backend app does not have any routes for incoming traffic, communication between auth proxy and backend is strictly on localhost interface. However, the application runs just as well as a stand-alone installation.
 
 ### Overview
 
@@ -57,19 +55,19 @@ When an end user wants to interact with any frontend application that communicat
 
 1. User loads application page which will generate requests to backend for data.
 2. Auth proxy will check for authorization code on either Authorization header or inside auth cookie (depending on configuration). For the first request, it will find neither. In this case a `HTTP 401 Unauthorized` response will be returned together with payload containing redirect URL (see example below).
-3. Client should check for 401 responses and set `window.location.href` to the URL received in step 2. This will present the authentication UI of the OIDC provider to the end user. 
+3. Client should check for 401 responses and route to the URL received in step 2 (for example by setting `window.location.href`). This will present the authentication UI of the OIDC provider to the end user. 
 4. User enters credentials and submits.
 5. Upon successful authentication, OIDC provider redirects back to the `/oidc/callback` auth proxy endpoint with information such as `state` and `code` (authorization code). 
 6. Exchange the auth code for a full token set (access token and refresh token). Access token is in the form of a JWT. At this point we store the token using auth code as key to minimize number of calls to OIDC backend. 
-7. A redirect is sent back to the client browser and, depending on configuration, we set a cookie or return an `Authorization` header containing the authorization code (not the full JWT). 
-8. A new backend request is sent, this time containing a valid authorization code as a Bearer token header or in a cookie. 
+7. A redirect is sent back to the client browser and, depending on configuration, we either set a cookie or a query string parameter containing the authorization code as a reference to the full JWT.
+8. A new backend request is sent, this time containing a valid authorization code as a Bearer token header (managed by client code) or in a cookie set in previous step.
 9. Auth proxy will look up cached tokens by the authorization code recieved, and set up the access token as a Bearer token header backend client call. Backend should still validate the token received.
 
 Example payload returned in step 2:
 
 ```json
 {
-    "redirect_to": "https://oidc.bigcorp.com/application-realm/protocol/openid-connect/auth?response_type=code&client_id=my-client-id&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Foidc%2Fcallback&state=383fe246-c2e5-46f7-a9b3-b873fc047196"
+    "redirect_to": "https://oidc.bigcorp.com/connect/authorize?response_type=code&client_id=dummy&scope=openid&state=4ce28904-e2ae-4ad5-beeb-85288875a507&code_challenge=DL1CzGe5phWF_hnbkGl14QgIwvCNoY9x1pvlYPI5ias&code_challenge_method=S256&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Foidc%2Fcallback"
 }
 ```
 
