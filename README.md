@@ -187,15 +187,15 @@ Prereq: Podman or docker must be installed.
 
 Getting up and running on localhost is quite easy thanks to the [OIDC Server Mock](https://github.com/Soluto/oidc-server-mock) docker image. Please follow these steps:
 
-1. In a command line, `cd` to `<project_root>/oidc`
-2. (optional) Edit settings files in `/oidc` directory.
+1. `cd` to `<project_root>/oidc`
+2. (optional) Edit settings files in `/oidc` directory to set server, client, and/or user settings.
 3. Execute `./run-podman-oidc.sh`. This should pull image, start server, and tail server log output.
-4. Launch another command line console and execute `run.sh` in project root. Proxy server should start using the default settings
+4. Launch another command line console and execute `run.sh` in project root. Proxy server should start and pull .well-known/openid-configuration from the server.
 5. Call any protected endpoint behind the `/api` uri node. For test purposes paste any URL, like `http:localhost:8080/api/testing`, into a browser. This should return a JSON object with a `redirect_to` URL. 
-6. Paste this URL into the same browser window. 
+6. Copy and paste this URL into the same browser window. 
 7. Enter credentials: `user`:`pass` (or whatever has been set up in the `/oidc/oidc-users-localhost.json` file)
 
-Depending on the `AUTHENTICATION_TYPE` selected, an auth code will be transferred to the URL defined in `AUTHENTICATION_FRONTEND_REDIRECT`.
+Depending on the `AUTHENTICATION_TYPE` selected, an auth code will be transferred to the URL defined in `AUTHENTICATION_FRONTEND_REDIRECT` and the full JWT will be visible in the server log. 
 
 # Quarkus
 

@@ -10,7 +10,6 @@ export AUTHENTICATION_FRONTEND_CALLBACK_PARAM=authcode
 export AUTHENTICATION_BACKEND_HEADER_NAME=Authorization
 export AUTHENTICATION_ALLOW_ORIGINS="/https://([a-z0-9\\-_]+)localhost/"
 export OIDC_PROVIDER_BASE_URL=http://localhost:9090
-export OIDC_AUTH_URI_TEMPLATE="?response_type=code&client_id=%s&scope=openid&state=%s&code_challenge=%s&code_challenge_method=S256&redirect_uri=%s"
 export OIDC_CLIENT_ID=dummy
 export OIDC_CLIENT_SECRET=dummy
 export OIDC_REDIRECT_URI=http://localhost:8080/oidc/callback

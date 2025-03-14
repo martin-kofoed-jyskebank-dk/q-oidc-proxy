@@ -67,11 +67,6 @@ public class AuthService {
         return pkceService.containsState(id);
     }
     
-    private String doVarSubstitution(String authUriTemplate, AuthenticationSessionData sessionData) {
-
-        return "";
-    }
-
     /**
      * Exhange an auth token with a full access_token by calling OIDC provider token endpoint
      * using <code>authorization_code</code> grant type.
@@ -81,8 +76,6 @@ public class AuthService {
         String codeVerifier = pkceService.getCodeVerifier(state);
 
         logger.info("Getting access_token for auth code [{}]. Code verifier: [{}]", authCode, codeVerifier);
-
-        logger.info("Client ID: [{}]. Client secret: [{}]. Redirect uri: [{}].", clientId, clientSecret, redirectUri);
 
         try {
             AccessTokenResponse response = oidcClient.getAccessToken(
@@ -127,6 +120,14 @@ public class AuthService {
 
     private String buildTokenEndpoint(String fullyQualifiedEndpoint) {
         return fullyQualifiedEndpoint.substring(oidcBaseUrl.length() + 1);
+    }
+
+    private String doVarSubstitution(String authUriTemplate, AuthenticationSessionData sessionData) {
+        return authUriTemplate
+            .replace("{{redirectUri}}", URLEncoder.encode(redirectUri, StandardCharsets.UTF_8))
+            .replace("{{codeChallenge}}", sessionData.codeChallenge())
+            .replace("{{state}}", sessionData.state())
+            .replace("{{clientId}}", clientId);
     }
 
     /**
