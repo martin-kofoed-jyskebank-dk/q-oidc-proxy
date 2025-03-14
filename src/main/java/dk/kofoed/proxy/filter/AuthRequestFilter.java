@@ -95,11 +95,13 @@ public class AuthRequestFilter {
 
                 AccessTokenResponse cachedToken = tokenCache.get(cacheKey);
 
-                // if refresh_token is expired, return immediately
-                if (tokenHelper.tokenExpired(cachedToken.refreshToken(), 0)) {
-                    logger.info("Token found but refresh_token expired. Sending redirect info.");
-                    tokenCache.remove(cacheKey);
-                    return unauth();
+                // if we have a refresh_token available, check if it is expired. If so, return immediately
+                if (cachedToken.refreshToken() != null) {
+                    if (tokenHelper.tokenExpired(cachedToken.refreshToken(), 0)) {
+                        logger.info("Token found but refresh_token expired. Sending redirect info.");
+                        tokenCache.remove(cacheKey);
+                        return unauth();
+                    }
                 }
 
                 checkTokenRefresh(cacheKey);
