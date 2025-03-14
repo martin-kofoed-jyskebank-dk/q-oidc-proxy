@@ -76,7 +76,7 @@ Example payload returned in step 2:
 > All calls to protected backend resources must pass through a URL junction named `/api`. This junction is removed by the proxy before calling actual backend. 
 
 > [!TIP]
-> If a refresh_token was returned from the OIDC provider, we will try to refresh the access_token automatically if the cached token in step (9) has expired. If there is no refresh_token, or the refresh_token has also expired, we will repeat everything from step 1.
+> If a refresh_token was returned from the OIDC provider, we will try to refresh the access_token automatically if the cached token in step (9) has expired. If there is no refresh_token, or the refresh_token itself has expired, we will repeat everything from step 1.
 
 If backend uses role-based authorization it may send `403 Forbidden` responses. These will make it all the way back to the client. 
 
