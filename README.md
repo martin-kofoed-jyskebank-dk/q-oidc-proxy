@@ -31,9 +31,9 @@ A simple, fast, configurable OIDC proxy for plug-in token-based security.
     - [`OIDC_AUTH_URI_TEMPLATE`](#oidc_auth_uri_template)
     - [`OIDC_CLIENT_SECRET`](#oidc_client_secret)
   - [Miscellaneous settings](#miscellaneous-settings)
+    - [`BACKEND_HOST_BASE_URL`](#backend_host_base_url)
     - [`BACKEND_HEADER_PROPAGATION`](#backend_header_propagation)
     - [`AUTHENTICATION_CORS_ALLOW_ORIGINS`](#authentication_cors_allow_origins)
-    - [`BACKEND_HOST_BASE_URL`](#backend_host_base_url)
 - [Run on localhost](#run-on-localhost)
 - [Quarkus](#quarkus)
 
@@ -53,8 +53,8 @@ When an end user wants to interact with any frontend application that communicat
 
 ### Steps involved
 
-1. User loads application page which will generate requests to backend for data.
-2. Auth proxy will check for authorization code on either Authorization header or inside auth cookie (depending on configuration). For the first request, it will find neither. In this case a `HTTP 401 Unauthorized` response will be returned together with payload containing redirect URL (see example below).
+1. User loads application page which will generate requests to backend for data via proxy.
+2. QProxy will check for authorization code on either Authorization header or inside auth cookie (depending on configuration). For the first request, it will find neither. In this case a `HTTP 401 Unauthorized` response will be returned together with payload containing redirect URL (see example below).
 3. Client should check for 401 responses and route to the URL received in step 2 (for example by setting `window.location.href`). This will present the authentication UI of the OIDC provider to the end user. 
 4. User enters credentials and submits.
 5. Upon successful authentication, OIDC provider redirects back to the `/oidc/callback` auth proxy endpoint with information such as `state` and `code` (authorization code). 
@@ -71,7 +71,12 @@ Example payload returned in step 2:
 }
 ```
 
-If the cached token in step (9) has expired, we will make a call to the OIDC provider using the refresh token to acquire a new access token. If this step fails, we will remove the cached entry and repeat from step 1. 
+
+> [!NOTE]  
+> All calls to protected backend resources must pass through a URL junction named `/api`. This junction is removed by the proxy before calling actual backend. 
+
+> [!TIP]
+> If a refresh_token was returned from the OIDC provider, we will try to refresh the access_token automatically if the cached token in step (9) has expired. If there is no refresh_token, or the refresh_token has also expired, we will repeat everything from step 1.
 
 If backend uses role-based authorization it may send `403 Forbidden` responses. These will make it all the way back to the client. 
 
@@ -167,6 +172,10 @@ The client secret issued by the OIDC provider.
 
 ## Miscellaneous settings
 
+### `BACKEND_HOST_BASE_URL`
+
+Mandatory value. Base URL and port number for protected backend ressources.
+
 ### `BACKEND_HEADER_PROPAGATION`
 
 Comma-separated list of headers to propagate to proxied backend requests. Defaults to `Authorization, X-Correlation-Id`.
@@ -174,10 +183,6 @@ Comma-separated list of headers to propagate to proxied backend requests. Defaul
 ### `AUTHENTICATION_CORS_ALLOW_ORIGINS`
 
 Comma-separated list of allowed origins. Defaults to `/https://([a-z0-9\\-_]+)\\.my\\.corporation\\.net/` in everything else than Quarkus DEV. When running in DEV mode, all origins are allowed. 
-
-### `BACKEND_HOST_BASE_URL`
-
-Mandatory value. URL and port for protected backend ressource. Please note that uri path must always begin with an `/api` node. This node will be removed before making the backend call. 
 
 # Run on localhost
 
