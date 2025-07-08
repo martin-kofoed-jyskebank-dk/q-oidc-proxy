@@ -12,6 +12,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import java.util.Set;
 
 import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -22,6 +24,8 @@ import dk.kofoed.proxy.client.RestPathHelper;
 @RequestScoped
 @Path("/api")
 public class ProxyApi {
+
+    private static final Set<String> HEADER_PROPAGATION_BLACKLIST = Set.of("content-length", "transfer-encoding", "connection");
 
     @Inject
     @RestClient
@@ -36,11 +40,11 @@ public class ProxyApi {
     @Path("/{any:.*}")
     @GET
     @Produces(MediaType.WILDCARD)
-    public Uni<String> proxyBackendGetData(@PathParam("any") String proxyPath) {
+    public Uni<Response> proxyBackendGetData(@PathParam("any") String proxyPath) {
 
         pathHelper.setUri(proxyPath);
 
-        return proxyClient.callBackendGet();
+        return proxyClient.callBackendGet().map(this::propagateHeaders);
     }
 
     /**
@@ -50,11 +54,11 @@ public class ProxyApi {
     @POST
     @Produces(MediaType.WILDCARD)
     @Consumes(MediaType.WILDCARD)
-    public Uni<String> proxyBackendPostData(@PathParam("any") String proxyPath, String payload) {
+    public Uni<Response> proxyBackendPostData(@PathParam("any") String proxyPath, String payload) {
 
         pathHelper.setUri(proxyPath);
 
-        return proxyClient.callBackendPost(payload);
+        return proxyClient.callBackendPost(payload).map(this::propagateHeaders);
     }
 
     /**
@@ -64,11 +68,11 @@ public class ProxyApi {
     @PUT
     @Produces(MediaType.WILDCARD)
     @Consumes(MediaType.WILDCARD)
-    public Uni<String> proxyBackendPutData(@PathParam("any") String proxyPath, String payload) {
+    public Uni<Response> proxyBackendPutData(@PathParam("any") String proxyPath, String payload) {
 
         pathHelper.setUri(proxyPath);
 
-        return proxyClient.callBackendPut(payload);
+        return proxyClient.callBackendPut(payload).map(this::propagateHeaders);
     }
 
     /**
@@ -78,11 +82,11 @@ public class ProxyApi {
     @PATCH
     @Produces(MediaType.WILDCARD)
     @Consumes(MediaType.WILDCARD)
-    public Uni<String> proxyBackendPatchData(@PathParam("any") String proxyPath, String payload) {
+    public Uni<Response> proxyBackendPatchData(@PathParam("any") String proxyPath, String payload) {
 
         pathHelper.setUri(proxyPath);
 
-        return proxyClient.callBackendPatch(payload);
+        return proxyClient.callBackendPatch(payload).map(this::propagateHeaders);
     }
 
     /**
@@ -92,11 +96,28 @@ public class ProxyApi {
     @DELETE
     @Produces(MediaType.WILDCARD)
     @Consumes(MediaType.WILDCARD)
-    public Uni<String> proxyBackendDeleteData(@PathParam("any") String proxyPath, String payload) {
+    public Uni<Response> proxyBackendDeleteData(@PathParam("any") String proxyPath, String payload) {
 
         pathHelper.setUri(proxyPath);
 
-        return proxyClient.callBackendDelete(payload);
+        return proxyClient.callBackendDelete(payload).map(this::propagateHeaders);
     }
+
+    /**
+     * Grab headers from original client response and add to new response unless blacklisted.
+     */
+    private Response propagateHeaders(Response originalResponse) {
+
+        Response.ResponseBuilder responseBuilder = Response
+            .status(originalResponse.getStatus())
+            .entity(originalResponse.getEntity());
+
+        originalResponse.getHeaders().keySet().forEach(key -> {
+            if (!HEADER_PROPAGATION_BLACKLIST.contains(key.toLowerCase())) {
+                responseBuilder.header(key, originalResponse.getHeaderString(key));
+            }
+        });
+        return responseBuilder.build();
+    }    
     
 }
