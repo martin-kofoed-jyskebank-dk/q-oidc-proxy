@@ -29,31 +29,31 @@ public interface ProxyClient {
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    public Uni<String> callBackendGet();
+    public Uni<Response> callBackendGet();
 
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @POST
-    public Uni<String> callBackendPost(String payload);
+    public Uni<Response> callBackendPost(String payload);
 
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @PUT
-    public Uni<String> callBackendPut(String payload);
+    public Uni<Response> callBackendPut(String payload);
 
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @PATCH
-    public Uni<String> callBackendPatch(String payload);
+    public Uni<Response> callBackendPatch(String payload);
 
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @DELETE
-    public Uni<String> callBackendDelete(String payload);
+    public Uni<Response> callBackendDelete(String payload);
 
     /**
      * Map error response to <code>ProxyClientException</code>. If error response has a payload, 
