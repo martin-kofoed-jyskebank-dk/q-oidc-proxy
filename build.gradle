@@ -27,8 +27,8 @@ dependencies {
     testImplementation 'io.rest-assured:rest-assured'
 }
 
-group 'dk.kofoed'
-version '1.0.0-SNAPSHOT'
+group = 'dk.kofoed'
+version = '1.0.0-SNAPSHOT'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
